@@ -7,3 +7,7 @@
 .sw[a-z]
 tags
 tegra/
+MSys/
+NB_MSys/
+include/Eigen
+include/unsupported
