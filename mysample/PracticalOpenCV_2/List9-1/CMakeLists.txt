@@ -15,7 +15,7 @@ ocv_check_dependencies(${OPENCV_CPP_SAMPLES_REQUIRED_DEPS})
 # Find the Boost installation, specifically the components 'system' and 'filesystem'
 if (WIN32)
   if(MSVC)
-    set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../../boost_1_55_0/msvc/")
+    set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../boost_1_55_0")
   else()
     set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../boost_1_55_0")
     set(BOOST_INCLUDEDIR "${OpenCV_SOURCE_DIR}/include")

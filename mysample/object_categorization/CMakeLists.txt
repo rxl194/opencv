@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 # Find the Boost installation, specifically the components 'system' and 'filesystem'
 if (WIN32)
   if (MSVC)
-    set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../../boost_1_55_0/msvc/")
+    set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../boost_1_55_0/")
   else()
     set(BOOST_ROOT "${OpenCV_SOURCE_DIR}/../boost_1_55_0")
 #    set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
