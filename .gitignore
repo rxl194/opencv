@@ -10,5 +10,6 @@ tegra/
 MSys/
 NB_MSys/
 VS10/
+VS13_x86/
 include/Eigen
 include/unsupported
