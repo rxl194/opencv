@@ -10,6 +10,8 @@ tegra/
 MSys/
 NB_MSys/
 VS10/
+Fedora/
+Ubuntu/
 VS13_x86/
 include/Eigen
 include/unsupported
