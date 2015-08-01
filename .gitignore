@@ -22,3 +22,7 @@ CMakeCache.txt
 *.suo
 *.log
 *.tlog
+MSys/*
+NB_ocv3.0.0
+include/Eigen/*
+include/unsupported/*
