@@ -23,3 +23,5 @@ CMakeCache.txt
 *.log
 *.tlog
 build
+NB_ocv3.1.0
+
