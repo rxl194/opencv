@@ -9,6 +9,7 @@ tags
 tegra/
 MSys/
 NB_MSys/
+NB_Ocv2.4.10/*
 VS10/
 Fedora/
 Ubuntu/
