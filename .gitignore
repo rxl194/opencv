@@ -23,6 +23,7 @@ CMakeCache.txt
 *.log
 *.tlog
 MSys/*
+build/
 NB_ocv3.0.0
 include/Eigen/*
 include/unsupported/*
