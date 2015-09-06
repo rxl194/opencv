@@ -13,6 +13,7 @@ NB_Ocv2.4.10/*
 VS10/
 Fedora/
 Ubuntu/
+build/
 VS13_x86/
 include/Eigen
 include/unsupported
