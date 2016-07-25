@@ -91,7 +91,7 @@ compensate for the differences in the size of areas. The sums of pixel values ov
 regions are calculated rapidly using integral images (see below and the integral description).
 
 To see the object detector at work, have a look at the facedetect demo:
-<https://github.com/Itseez/opencv/tree/master/samples/cpp/dbt_face_detection.cpp>
+<https://github.com/opencv/opencv/tree/master/samples/cpp/dbt_face_detection.cpp>
 
 The following reference is for the detection part only. There is a separate application called
 opencv_traincascade that can train a cascade of boosted classifiers from a set of samples.
@@ -261,7 +261,7 @@ public:
 
     @note
        -   (Python) A face detection example using cascade classifiers can be found at
-            opencv_source_code/samples/python2/facedetect.py
+            opencv_source_code/samples/python/facedetect.py
     */
     CV_WRAP void detectMultiScale( InputArray image,
                           CV_OUT std::vector<Rect>& objects,

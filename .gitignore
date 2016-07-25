@@ -22,8 +22,12 @@ CMakeCache.txt
 *.suo
 *.log
 *.tlog
+<<<<<<< HEAD
 MSys/*
 build/
 NB_ocv3.0.0
 include/Eigen/*
 include/unsupported/*
+=======
+build
+>>>>>>> 52444bf8d0e66f1f3c240a7f00b049e35811fe47

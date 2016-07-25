@@ -43,6 +43,23 @@
 #include "precomp.hpp"
 #include "opencl_kernels_imgproc.hpp"
 
+#if CV_NEON && defined(__aarch64__)
+#include <arm_neon.h>
+namespace cv {
+// Workaround with missing definitions of vreinterpretq_u64_f64/vreinterpretq_f64_u64
+template <typename T> static inline
+uint64x2_t vreinterpretq_u64_f64(T a)
+{
+    return (uint64x2_t) a;
+}
+template <typename T> static inline
+float64x2_t vreinterpretq_f64_u64(T a)
+{
+    return (float64x2_t) a;
+}
+} // namespace cv
+#endif
+
 namespace cv
 {
 
@@ -397,7 +414,7 @@ thresh_16s( const Mat& _src, Mat& _dst, short thresh, short maxval, int type )
     size_t dst_step = _dst.step/sizeof(dst[0]);
 
 #if CV_SSE2
-    volatile bool useSIMD = checkHardwareSupport(CV_CPU_SSE);
+    volatile bool useSIMD = checkHardwareSupport(CV_CPU_SSE2);
 #endif
 
     if( _src.isContinuous() && _dst.isContinuous() )
@@ -665,7 +682,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
     size_t src_step = _src.step/sizeof(src[0]);
     size_t dst_step = _dst.step/sizeof(dst[0]);
 
-#if CV_SSE2
+#if CV_SSE
     volatile bool useSIMD = checkHardwareSupport(CV_CPU_SSE);
 #endif
 
@@ -720,7 +737,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
             for( i = 0; i < roi.height; i++, src += src_step, dst += dst_step )
             {
                 j = 0;
-#if CV_SSE2
+#if CV_SSE
                 if( useSIMD )
                 {
                     __m128 thresh4 = _mm_set1_ps(thresh), maxval4 = _mm_set1_ps(maxval);
@@ -758,7 +775,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
             for( i = 0; i < roi.height; i++, src += src_step, dst += dst_step )
             {
                 j = 0;
-#if CV_SSE2
+#if CV_SSE
                 if( useSIMD )
                 {
                     __m128 thresh4 = _mm_set1_ps(thresh), maxval4 = _mm_set1_ps(maxval);
@@ -796,7 +813,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
             for( i = 0; i < roi.height; i++, src += src_step, dst += dst_step )
             {
                 j = 0;
-#if CV_SSE2
+#if CV_SSE
                 if( useSIMD )
                 {
                     __m128 thresh4 = _mm_set1_ps(thresh);
@@ -827,7 +844,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
             for( i = 0; i < roi.height; i++, src += src_step, dst += dst_step )
             {
                 j = 0;
-#if CV_SSE2
+#if CV_SSE
                 if( useSIMD )
                 {
                     __m128 thresh4 = _mm_set1_ps(thresh);
@@ -866,7 +883,7 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
             for( i = 0; i < roi.height; i++, src += src_step, dst += dst_step )
             {
                 j = 0;
-#if CV_SSE2
+#if CV_SSE
                 if( useSIMD )
                 {
                     __m128 thresh4 = _mm_set1_ps(thresh);
@@ -904,10 +921,277 @@ thresh_32f( const Mat& _src, Mat& _dst, float thresh, float maxval, int type )
     }
 }
 
+static void
+thresh_64f(const Mat& _src, Mat& _dst, double thresh, double maxval, int type)
+{
+    int i, j;
+    Size roi = _src.size();
+    roi.width *= _src.channels();
+    const double* src = _src.ptr<double>();
+    double* dst = _dst.ptr<double>();
+    size_t src_step = _src.step / sizeof(src[0]);
+    size_t dst_step = _dst.step / sizeof(dst[0]);
+
+#if CV_SSE2
+    volatile bool useSIMD = checkHardwareSupport(CV_CPU_SSE2);
+#endif
+
+    if (_src.isContinuous() && _dst.isContinuous())
+    {
+        roi.width *= roi.height;
+        roi.height = 1;
+    }
+
+    switch (type)
+    {
+    case THRESH_BINARY:
+        for (i = 0; i < roi.height; i++, src += src_step, dst += dst_step)
+        {
+            j = 0;
+#if CV_SSE2
+            if( useSIMD )
+            {
+                __m128d thresh2 = _mm_set1_pd(thresh), maxval2 = _mm_set1_pd(maxval);
+                for( ; j <= roi.width - 8; j += 8 )
+                {
+                    __m128d v0, v1, v2, v3;
+                    v0 = _mm_loadu_pd( src + j );
+                    v1 = _mm_loadu_pd( src + j + 2 );
+                    v2 = _mm_loadu_pd( src + j + 4 );
+                    v3 = _mm_loadu_pd( src + j + 6 );
+                    v0 = _mm_cmpgt_pd( v0, thresh2 );
+                    v1 = _mm_cmpgt_pd( v1, thresh2 );
+                    v2 = _mm_cmpgt_pd( v2, thresh2 );
+                    v3 = _mm_cmpgt_pd( v3, thresh2 );
+                    v0 = _mm_and_pd( v0, maxval2 );
+                    v1 = _mm_and_pd( v1, maxval2 );
+                    v2 = _mm_and_pd( v2, maxval2 );
+                    v3 = _mm_and_pd( v3, maxval2 );
+                    _mm_storeu_pd( dst + j, v0 );
+                    _mm_storeu_pd( dst + j + 2, v1 );
+                    _mm_storeu_pd( dst + j + 4, v2 );
+                    _mm_storeu_pd( dst + j + 6, v3 );
+                }
+            }
+#elif CV_NEON && defined(__aarch64__)
+            float64x2_t v_thresh = vdupq_n_f64(thresh);
+            uint64x2_t v_maxval = vreinterpretq_u64_f64(vdupq_n_f64(maxval));
+
+            for( ; j <= roi.width - 4; j += 4 )
+            {
+                float64x2_t v_src0 = vld1q_f64(src + j);
+                float64x2_t v_src1 = vld1q_f64(src + j + 2);
+                uint64x2_t v_dst0 = vandq_u64(vcgtq_f64(v_src0, v_thresh), v_maxval);
+                uint64x2_t v_dst1 = vandq_u64(vcgtq_f64(v_src1, v_thresh), v_maxval);
+                vst1q_f64(dst + j, vreinterpretq_f64_u64(v_dst0));
+                vst1q_f64(dst + j + 2, vreinterpretq_f64_u64(v_dst1));
+            }
+#endif
+
+            for (; j < roi.width; j++)
+                dst[j] = src[j] > thresh ? maxval : 0;
+        }
+        break;
+
+    case THRESH_BINARY_INV:
+        for (i = 0; i < roi.height; i++, src += src_step, dst += dst_step)
+        {
+            j = 0;
+
+#if CV_SSE2
+            if( useSIMD )
+            {
+                __m128d thresh2 = _mm_set1_pd(thresh), maxval2 = _mm_set1_pd(maxval);
+                for( ; j <= roi.width - 8; j += 8 )
+                {
+                    __m128d v0, v1, v2, v3;
+                    v0 = _mm_loadu_pd( src + j );
+                    v1 = _mm_loadu_pd( src + j + 2 );
+                    v2 = _mm_loadu_pd( src + j + 4 );
+                    v3 = _mm_loadu_pd( src + j + 6 );
+                    v0 = _mm_cmple_pd( v0, thresh2 );
+                    v1 = _mm_cmple_pd( v1, thresh2 );
+                    v2 = _mm_cmple_pd( v2, thresh2 );
+                    v3 = _mm_cmple_pd( v3, thresh2 );
+                    v0 = _mm_and_pd( v0, maxval2 );
+                    v1 = _mm_and_pd( v1, maxval2 );
+                    v2 = _mm_and_pd( v2, maxval2 );
+                    v3 = _mm_and_pd( v3, maxval2 );
+                    _mm_storeu_pd( dst + j, v0 );
+                    _mm_storeu_pd( dst + j + 2, v1 );
+                    _mm_storeu_pd( dst + j + 4, v2 );
+                    _mm_storeu_pd( dst + j + 6, v3 );
+                }
+            }
+#elif CV_NEON && defined(__aarch64__)
+            float64x2_t v_thresh = vdupq_n_f64(thresh);
+            uint64x2_t v_maxval = vreinterpretq_u64_f64(vdupq_n_f64(maxval));
+
+            for( ; j <= roi.width - 4; j += 4 )
+            {
+                float64x2_t v_src0 = vld1q_f64(src + j);
+                float64x2_t v_src1 = vld1q_f64(src + j + 2);
+                uint64x2_t v_dst0 = vandq_u64(vcleq_f64(v_src0, v_thresh), v_maxval);
+                uint64x2_t v_dst1 = vandq_u64(vcleq_f64(v_src1, v_thresh), v_maxval);
+                vst1q_f64(dst + j, vreinterpretq_f64_u64(v_dst0));
+                vst1q_f64(dst + j + 2, vreinterpretq_f64_u64(v_dst1));
+            }
+#endif
+            for (; j < roi.width; j++)
+                dst[j] = src[j] <= thresh ? maxval : 0;
+        }
+        break;
+
+    case THRESH_TRUNC:
+        for (i = 0; i < roi.height; i++, src += src_step, dst += dst_step)
+        {
+            j = 0;
+
+#if CV_SSE2
+            if( useSIMD )
+            {
+                __m128d thresh2 = _mm_set1_pd(thresh);
+                for( ; j <= roi.width - 8; j += 8 )
+                {
+                    __m128d v0, v1, v2, v3;
+                    v0 = _mm_loadu_pd( src + j );
+                    v1 = _mm_loadu_pd( src + j + 2 );
+                    v2 = _mm_loadu_pd( src + j + 4 );
+                    v3 = _mm_loadu_pd( src + j + 6 );
+                    v0 = _mm_min_pd( v0, thresh2 );
+                    v1 = _mm_min_pd( v1, thresh2 );
+                    v2 = _mm_min_pd( v2, thresh2 );
+                    v3 = _mm_min_pd( v3, thresh2 );
+                    _mm_storeu_pd( dst + j, v0 );
+                    _mm_storeu_pd( dst + j + 2, v1 );
+                    _mm_storeu_pd( dst + j + 4, v2 );
+                    _mm_storeu_pd( dst + j + 6, v3 );
+                }
+            }
+#elif CV_NEON && defined(__aarch64__)
+            float64x2_t v_thresh = vdupq_n_f64(thresh);
+
+            for( ; j <= roi.width - 4; j += 4 )
+            {
+                float64x2_t v_src0 = vld1q_f64(src + j);
+                float64x2_t v_src1 = vld1q_f64(src + j + 2);
+                float64x2_t v_dst0 = vminq_f64(v_src0, v_thresh);
+                float64x2_t v_dst1 = vminq_f64(v_src1, v_thresh);
+                vst1q_f64(dst + j, v_dst0);
+                vst1q_f64(dst + j + 2, v_dst1);
+            }
+#endif
+            for (; j < roi.width; j++)
+                dst[j] = std::min(src[j], thresh);
+        }
+        break;
+
+    case THRESH_TOZERO:
+        for (i = 0; i < roi.height; i++, src += src_step, dst += dst_step)
+        {
+            j = 0;
+
+#if CV_SSE2
+            if( useSIMD )
+            {
+                __m128d thresh2 = _mm_set1_pd(thresh);
+                for( ; j <= roi.width - 8; j += 8 )
+                {
+                    __m128d v0, v1, v2, v3;
+                    v0 = _mm_loadu_pd( src + j );
+                    v1 = _mm_loadu_pd( src + j + 2 );
+                    v2 = _mm_loadu_pd( src + j + 4 );
+                    v3 = _mm_loadu_pd( src + j + 6 );
+                    v0 = _mm_and_pd( v0, _mm_cmpgt_pd(v0, thresh2));
+                    v1 = _mm_and_pd( v1, _mm_cmpgt_pd(v1, thresh2));
+                    v2 = _mm_and_pd( v2, _mm_cmpgt_pd(v2, thresh2));
+                    v3 = _mm_and_pd( v3, _mm_cmpgt_pd(v3, thresh2));
+                    _mm_storeu_pd( dst + j, v0 );
+                    _mm_storeu_pd( dst + j + 2, v1 );
+                    _mm_storeu_pd( dst + j + 4, v2 );
+                    _mm_storeu_pd( dst + j + 6, v3 );
+                }
+            }
+#elif CV_NEON && defined(__aarch64__)
+            float64x2_t v_thresh = vdupq_n_f64(thresh);
+
+            for( ; j <= roi.width - 4; j += 4 )
+            {
+                float64x2_t v_src0 = vld1q_f64(src + j);
+                float64x2_t v_src1 = vld1q_f64(src + j + 2);
+                uint64x2_t v_dst0 = vandq_u64(vcgtq_f64(v_src0, v_thresh),
+                                              vreinterpretq_u64_f64(v_src0));
+                uint64x2_t v_dst1 = vandq_u64(vcgtq_f64(v_src1, v_thresh),
+                                              vreinterpretq_u64_f64(v_src1));
+                vst1q_f64(dst + j, vreinterpretq_f64_u64(v_dst0));
+                vst1q_f64(dst + j + 2, vreinterpretq_f64_u64(v_dst1));
+            }
+#endif
+            for (; j < roi.width; j++)
+            {
+                double v = src[j];
+                dst[j] = v > thresh ? v : 0;
+            }
+        }
+        break;
+
+    case THRESH_TOZERO_INV:
+        for (i = 0; i < roi.height; i++, src += src_step, dst += dst_step)
+        {
+            j = 0;
+
+#if CV_SSE2
+            if( useSIMD )
+            {
+                __m128d thresh2 = _mm_set1_pd(thresh);
+                for( ; j <= roi.width - 8; j += 8 )
+                {
+                    __m128d v0, v1, v2, v3;
+                    v0 = _mm_loadu_pd( src + j );
+                    v1 = _mm_loadu_pd( src + j + 2 );
+                    v2 = _mm_loadu_pd( src + j + 4 );
+                    v3 = _mm_loadu_pd( src + j + 6 );
+                    v0 = _mm_and_pd( v0, _mm_cmple_pd(v0, thresh2));
+                    v1 = _mm_and_pd( v1, _mm_cmple_pd(v1, thresh2));
+                    v2 = _mm_and_pd( v2, _mm_cmple_pd(v2, thresh2));
+                    v3 = _mm_and_pd( v3, _mm_cmple_pd(v3, thresh2));
+                    _mm_storeu_pd( dst + j, v0 );
+                    _mm_storeu_pd( dst + j + 2, v1 );
+                    _mm_storeu_pd( dst + j + 4, v2 );
+                    _mm_storeu_pd( dst + j + 6, v3 );
+                }
+            }
+#elif CV_NEON && defined(__aarch64__)
+            float64x2_t v_thresh = vdupq_n_f64(thresh);
+
+            for( ; j <= roi.width - 4; j += 4 )
+            {
+                float64x2_t v_src0 = vld1q_f64(src + j);
+                float64x2_t v_src1 = vld1q_f64(src + j + 2);
+                uint64x2_t v_dst0 = vandq_u64(vcleq_f64(v_src0, v_thresh),
+                                              vreinterpretq_u64_f64(v_src0));
+                uint64x2_t v_dst1 = vandq_u64(vcleq_f64(v_src1, v_thresh),
+                                              vreinterpretq_u64_f64(v_src1));
+                vst1q_f64(dst + j, vreinterpretq_f64_u64(v_dst0));
+                vst1q_f64(dst + j + 2, vreinterpretq_f64_u64(v_dst1));
+            }
+#endif
+            for (; j < roi.width; j++)
+            {
+                double v = src[j];
+                dst[j] = v <= thresh ? v : 0;
+            }
+        }
+        break;
+    default:
+        return CV_Error(CV_StsBadArg, "");
+    }
+}
+
 #ifdef HAVE_IPP
 static bool ipp_getThreshVal_Otsu_8u( const unsigned char* _src, int step, Size size, unsigned char &thresh)
 {
-#if IPP_VERSION_X100 >= 801 && !HAVE_ICV
+#if IPP_VERSION_X100 >= 810 && !HAVE_ICV
     int ippStatus = -1;
     IppiSize srcSize = { size.width, size.height };
     CV_SUPPRESS_DEPRECATED_START
@@ -937,7 +1221,7 @@ getThreshVal_Otsu_8u( const Mat& _src )
 
 #ifdef HAVE_IPP
     unsigned char thresh;
-    CV_IPP_RUN(IPP_VERSION_X100 >= 801 && !HAVE_ICV, ipp_getThreshVal_Otsu_8u(_src.ptr(), step, size, thresh), thresh);
+    CV_IPP_RUN(IPP_VERSION_X100 >= 810 && !HAVE_ICV, ipp_getThreshVal_Otsu_8u(_src.ptr(), step, size, thresh), thresh);
 #endif
 
     const int N = 256;
@@ -1129,6 +1413,10 @@ public:
         {
             thresh_32f( srcStripe, dstStripe, (float)thresh, (float)maxval, thresholdType );
         }
+        else if( srcStripe.depth() == CV_64F )
+        {
+            thresh_64f(srcStripe, dstStripe, thresh, maxval, thresholdType);
+        }
     }
 
 private:
@@ -1180,7 +1468,7 @@ static bool ocl_threshold( InputArray _src, OutputArray _dst, double & thresh, d
            ocl::KernelArg::Constant(Mat(1, 1, depth, Scalar::all(maxval))),
            ocl::KernelArg::Constant(Mat(1, 1, depth, Scalar::all(min_val))));
 
-    size_t globalsize[2] = { dst.cols * cn / kercn, dst.rows };
+    size_t globalsize[2] = { (size_t)dst.cols * cn / kercn, (size_t)dst.rows };
     globalsize[1] = (globalsize[1] + stride_size - 1) / stride_size;
     return k.run(2, globalsize, NULL, false);
 }
@@ -1269,6 +1557,8 @@ double cv::threshold( InputArray _src, OutputArray _dst, double thresh, double m
     }
     else if( src.depth() == CV_32F )
         ;
+    else if( src.depth() == CV_64F )
+        ;
     else
         CV_Error( CV_StsUnsupportedFormat, "" );
 
@@ -1301,11 +1591,17 @@ void cv::adaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
     if( src.data != dst.data )
         mean = dst;
 
-    if( method == ADAPTIVE_THRESH_MEAN_C )
+    if (method == ADAPTIVE_THRESH_MEAN_C)
         boxFilter( src, mean, src.type(), Size(blockSize, blockSize),
                    Point(-1,-1), true, BORDER_REPLICATE );
-    else if( method == ADAPTIVE_THRESH_GAUSSIAN_C )
-        GaussianBlur( src, mean, Size(blockSize, blockSize), 0, 0, BORDER_REPLICATE );
+    else if (method == ADAPTIVE_THRESH_GAUSSIAN_C)
+    {
+        Mat srcfloat,meanfloat;
+        src.convertTo(srcfloat,CV_32F);
+        meanfloat=srcfloat;
+        GaussianBlur(srcfloat, meanfloat, Size(blockSize, blockSize), 0, 0, BORDER_REPLICATE);
+        meanfloat.convertTo(mean, src.type());
+    }
     else
         CV_Error( CV_StsBadFlag, "Unknown/unsupported adaptive threshold method" );
 

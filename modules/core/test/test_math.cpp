@@ -2330,6 +2330,17 @@ void Core_SolvePolyTest::run( int )
             pass = pass && div < err_eps;
         }
 
+        //test x^3 = 0
+        cv::Mat coeffs_5623(4, 1, CV_64FC1);
+        cv::Mat r_5623(3, 1, CV_64FC2);
+        coeffs_5623.at<double>(0) = 1;
+        coeffs_5623.at<double>(1) = 0;
+        coeffs_5623.at<double>(2) = 0;
+        coeffs_5623.at<double>(3) = 0;
+        double prec_5623 = cv::solveCubic(coeffs_5623, r_5623);
+        pass = pass && r_5623.at<double>(0) == 0 && r_5623.at<double>(1) == 0 && r_5623.at<double>(2) == 0;
+        pass = pass && prec_5623 == 1;
+
         if (!pass)
         {
             ts->set_failed_test_info(cvtest::TS::FAIL_INVALID_OUTPUT);
@@ -2349,10 +2360,60 @@ void Core_SolvePolyTest::run( int )
     }
 }
 
+template<typename T>
+static void checkRoot(Mat& r, T re, T im)
+{
+    for (int i = 0; i < r.cols*r.rows; i++)
+    {
+        Vec<T, 2> v = *(Vec<T, 2>*)r.ptr(i);
+        if (fabs(re - v[0]) < 1e-6 && fabs(im - v[1]) < 1e-6)
+        {
+            v[0] = std::numeric_limits<T>::quiet_NaN();
+            v[1] = std::numeric_limits<T>::quiet_NaN();
+            return;
+        }
+    }
+    GTEST_NONFATAL_FAILURE_("Can't find root") << "(" << re << ", " << im << ")";
+}
+TEST(Core_SolvePoly, regression_5599)
+{
+    // x^4 - x^2 = 0, roots: 1, -1, 0, 0
+    cv::Mat coefs = (cv::Mat_<float>(1,5) << 0, 0, -1, 0, 1 );
+    {
+        cv::Mat r;
+        double prec;
+        prec = cv::solvePoly(coefs, r);
+        EXPECT_LE(prec, 1e-6);
+        EXPECT_EQ(4u, r.total());
+        //std::cout << "Preciseness = " << prec << std::endl;
+        //std::cout << "roots:\n" << r << "\n" << std::endl;
+        ASSERT_EQ(CV_32FC2, r.type());
+        checkRoot<float>(r, 1, 0);
+        checkRoot<float>(r, -1, 0);
+        checkRoot<float>(r, 0, 0);
+        checkRoot<float>(r, 0, 0);
+    }
+    // x^2 - 2x + 1 = 0,  roots: 1, 1
+    coefs = (cv::Mat_<float>(1,3) << 1, -2, 1 );
+    {
+        cv::Mat r;
+        double prec;
+        prec = cv::solvePoly(coefs, r);
+        EXPECT_LE(prec, 1e-6);
+        EXPECT_EQ(2u, r.total());
+        //std::cout << "Preciseness = " << prec << std::endl;
+        //std::cout << "roots:\n" << r << "\n" << std::endl;
+        ASSERT_EQ(CV_32FC2, r.type());
+        checkRoot<float>(r, 1, 0);
+        checkRoot<float>(r, 1, 0);
+    }
+}
+
 class Core_PhaseTest : public cvtest::BaseTest
 {
+    int t;
 public:
-    Core_PhaseTest() {}
+    Core_PhaseTest(int t_) : t(t_) {}
     ~Core_PhaseTest() {}
 protected:
     virtual void run(int)
@@ -2361,9 +2422,9 @@ protected:
         const int axisCount = 8;
         const int dim = theRNG().uniform(1,10);
         const float scale = theRNG().uniform(1.f, 100.f);
-        Mat x(axisCount + 1, dim, CV_32FC1),
-            y(axisCount + 1, dim, CV_32FC1);
-        Mat anglesInDegrees(axisCount + 1, dim, CV_32FC1);
+        Mat x(axisCount + 1, dim, t),
+            y(axisCount + 1, dim, t);
+        Mat anglesInDegrees(axisCount + 1, dim, t);
 
         // fill the data
         x.row(0).setTo(Scalar(0));
@@ -2442,40 +2503,25 @@ protected:
     }
 };
 
-class Core_CheckRange_Empty : public cvtest::BaseTest
-{
-public:
-    Core_CheckRange_Empty(){}
-    ~Core_CheckRange_Empty(){}
-protected:
-    virtual void run( int start_from );
-};
-
-void Core_CheckRange_Empty::run( int )
+TEST(Core_CheckRange_Empty, accuracy)
 {
     cv::Mat m;
     ASSERT_TRUE( cv::checkRange(m) );
 }
 
-TEST(Core_CheckRange_Empty, accuracy) { Core_CheckRange_Empty test; test.safe_run(); }
-
-class Core_CheckRange_INT_MAX : public cvtest::BaseTest
-{
-public:
-    Core_CheckRange_INT_MAX(){}
-    ~Core_CheckRange_INT_MAX(){}
-protected:
-    virtual void run( int start_from );
-};
-
-void Core_CheckRange_INT_MAX::run( int )
+TEST(Core_CheckRange_INT_MAX, accuracy)
 {
     cv::Mat m(3, 3, CV_32SC1, cv::Scalar(INT_MAX));
     ASSERT_FALSE( cv::checkRange(m, true, 0, 0, INT_MAX) );
     ASSERT_TRUE( cv::checkRange(m) );
 }
 
-TEST(Core_CheckRange_INT_MAX, accuracy) { Core_CheckRange_INT_MAX test; test.safe_run(); }
+TEST(Core_CheckRange_INT_MAX1, accuracy)
+{
+    cv::Mat m(3, 3, CV_32SC1, cv::Scalar(INT_MAX));
+    ASSERT_TRUE( cv::checkRange(m, true, 0, 0, INT_MAX+1.0f) );
+    ASSERT_TRUE( cv::checkRange(m) );
+}
 
 template <typename T> class Core_CheckRange : public testing::Test {};
 
@@ -2486,13 +2532,30 @@ TYPED_TEST_P(Core_CheckRange, Negative)
     double min_bound = 4.5;
     double max_bound = 16.0;
 
-    TypeParam data[] = {5, 10, 15, 4, 10, 2, 8, 12, 14};
+    TypeParam data[] = {5, 10, 15, 10, 10, 2, 8, 12, 14};
     cv::Mat src = cv::Mat(3,3, cv::DataDepth<TypeParam>::value, data);
 
     cv::Point bad_pt(0, 0);
 
     ASSERT_FALSE(checkRange(src, true, &bad_pt, min_bound, max_bound));
-    ASSERT_EQ(bad_pt.x, 0);
+    ASSERT_EQ(bad_pt.x, 2);
+    ASSERT_EQ(bad_pt.y, 1);
+}
+
+TYPED_TEST_P(Core_CheckRange, Negative3CN)
+{
+    double min_bound = 4.5;
+    double max_bound = 16.0;
+
+    TypeParam data[] = { 5,  6,  7,   10, 11, 12,   13, 14, 15,
+                        10, 11, 12,   10, 11, 12,    2,  5,  6,
+                         8,  8,  8,   12, 12, 12,   14, 14, 14};
+    cv::Mat src = cv::Mat(3,3, CV_MAKETYPE(cv::DataDepth<TypeParam>::value, 3), data);
+
+    cv::Point bad_pt(0, 0);
+
+    ASSERT_FALSE(checkRange(src, true, &bad_pt, min_bound, max_bound));
+    ASSERT_EQ(bad_pt.x, 2);
     ASSERT_EQ(bad_pt.y, 1);
 }
 
@@ -2554,7 +2617,49 @@ TYPED_TEST_P(Core_CheckRange, One)
     ASSERT_TRUE( checkRange(src2, true, NULL, min_bound, max_bound) );
 }
 
-REGISTER_TYPED_TEST_CASE_P(Core_CheckRange, Negative, Positive, Bounds, Zero, One);
+TEST(Core_CheckRange, NaN)
+{
+    float data[] = { 5,  6,  7,   10, 11, 12,   13, 14, 15,
+                    10, 11, 12,   10, 11, 12,   5,  5,  std::numeric_limits<float>::quiet_NaN(),
+                     8,  8,  8,   12, 12, 12,   14, 14, 14};
+    cv::Mat src = cv::Mat(3,3, CV_32FC3, data);
+
+    cv::Point bad_pt(0, 0);
+
+    ASSERT_FALSE(checkRange(src, true, &bad_pt));
+    ASSERT_EQ(bad_pt.x, 2);
+    ASSERT_EQ(bad_pt.y, 1);
+}
+
+TEST(Core_CheckRange, Inf)
+{
+    float data[] = { 5,  6,  7,   10, 11, 12,   13, 14, 15,
+                    10, 11, 12,   10, 11, 12,   5,  5,  std::numeric_limits<float>::infinity(),
+                     8,  8,  8,   12, 12, 12,   14, 14, 14};
+    cv::Mat src = cv::Mat(3,3, CV_32FC3, data);
+
+    cv::Point bad_pt(0, 0);
+
+    ASSERT_FALSE(checkRange(src, true, &bad_pt));
+    ASSERT_EQ(bad_pt.x, 2);
+    ASSERT_EQ(bad_pt.y, 1);
+}
+
+TEST(Core_CheckRange, Inf_Minus)
+{
+    float data[] = { 5,  6,  7,   10, 11, 12,   13, 14, 15,
+                    10, 11, 12,   10, 11, 12,   5,  5,  -std::numeric_limits<float>::infinity(),
+                     8,  8,  8,   12, 12, 12,   14, 14, 14};
+    cv::Mat src = cv::Mat(3,3, CV_32FC3, data);
+
+    cv::Point bad_pt(0, 0);
+
+    ASSERT_FALSE(checkRange(src, true, &bad_pt));
+    ASSERT_EQ(bad_pt.x, 2);
+    ASSERT_EQ(bad_pt.y, 1);
+}
+
+REGISTER_TYPED_TEST_CASE_P(Core_CheckRange, Negative, Negative3CN, Positive, Bounds, Zero, One);
 
 typedef ::testing::Types<signed char,unsigned char, signed short, unsigned short, signed int> mat_data_types;
 INSTANTIATE_TYPED_TEST_CASE_P(Negative_Test, Core_CheckRange, mat_data_types);
@@ -2592,8 +2697,8 @@ TEST(Core_SVD, accuracy) { Core_SVDTest test; test.safe_run(); }
 TEST(Core_SVBkSb, accuracy) { Core_SVBkSbTest test; test.safe_run(); }
 TEST(Core_Trace, accuracy) { Core_TraceTest test; test.safe_run(); }
 TEST(Core_SolvePoly, accuracy) { Core_SolvePolyTest test; test.safe_run(); }
-TEST(Core_Phase, accuracy) { Core_PhaseTest test; test.safe_run(); }
-
+TEST(Core_Phase, accuracy32f) { Core_PhaseTest test(CV_32FC1); test.safe_run(); }
+TEST(Core_Phase, accuracy64f) { Core_PhaseTest test(CV_64FC1); test.safe_run(); }
 
 TEST(Core_SVD, flt)
 {

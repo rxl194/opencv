@@ -1,6 +1,6 @@
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
 // eliminating duplicated round() declaration
-#define HAVE_ROUND
+#define HAVE_ROUND 1
 #endif
 
 #include <Python.h>
@@ -91,12 +91,14 @@ typedef std::vector<float> vector_float;
 typedef std::vector<double> vector_double;
 typedef std::vector<Point> vector_Point;
 typedef std::vector<Point2f> vector_Point2f;
+typedef std::vector<Point3f> vector_Point3f;
 typedef std::vector<Vec2f> vector_Vec2f;
 typedef std::vector<Vec3f> vector_Vec3f;
 typedef std::vector<Vec4f> vector_Vec4f;
 typedef std::vector<Vec6f> vector_Vec6f;
 typedef std::vector<Vec4i> vector_Vec4i;
 typedef std::vector<Rect> vector_Rect;
+typedef std::vector<Rect2d> vector_Rect2d;
 typedef std::vector<KeyPoint> vector_KeyPoint;
 typedef std::vector<Mat> vector_Mat;
 typedef std::vector<DMatch> vector_DMatch;
@@ -282,7 +284,7 @@ static bool pyopencv_to(PyObject* o, Mat& m, const ArgInfo info)
 
     if( type < 0 )
     {
-        if( typenum == NPY_INT64 || typenum == NPY_UINT64 || type == NPY_LONG )
+        if( typenum == NPY_INT64 || typenum == NPY_UINT64 || typenum == NPY_LONG )
         {
             needcopy = needcast = true;
             new_typenum = NPY_INT;
@@ -650,6 +652,21 @@ PyObject* pyopencv_from(const Rect& r)
 }
 
 template<>
+bool pyopencv_to(PyObject* obj, Rect2d& r, const char* name)
+{
+    (void)name;
+    if(!obj || obj == Py_None)
+        return true;
+    return PyArg_ParseTuple(obj, "dddd", &r.x, &r.y, &r.width, &r.height) > 0;
+}
+
+template<>
+PyObject* pyopencv_from(const Rect2d& r)
+{
+    return Py_BuildValue("(dddd)", r.x, r.y, r.width, r.height);
+}
+
+template<>
 bool pyopencv_to(PyObject* obj, Range& r, const char* name)
 {
     (void)name;
@@ -717,6 +734,23 @@ bool pyopencv_to(PyObject* obj, Point2d& p, const char* name)
     return PyArg_ParseTuple(obj, "dd", &p.x, &p.y) > 0;
 }
 
+template<>
+bool pyopencv_to(PyObject* obj, Point3f& p, const char* name)
+{
+    (void)name;
+    if(!obj || obj == Py_None)
+        return true;
+    return PyArg_ParseTuple(obj, "fff", &p.x, &p.y, &p.z) > 0;
+}
+
+template<>
+bool pyopencv_to(PyObject* obj, Point3d& p, const char* name)
+{
+    (void)name;
+    if(!obj || obj == Py_None)
+        return true;
+    return PyArg_ParseTuple(obj, "ddd", &p.x, &p.y, &p.z) > 0;
+}
 
 template<>
 PyObject* pyopencv_from(const Point& p)
@@ -728,6 +762,12 @@ template<>
 PyObject* pyopencv_from(const Point2f& p)
 {
     return Py_BuildValue("(dd)", p.x, p.y);
+}
+
+template<>
+PyObject* pyopencv_from(const Point3f& p)
+{
+    return Py_BuildValue("(ddd)", p.x, p.y, p.z);
 }
 
 template<>
@@ -755,6 +795,12 @@ template<>
 PyObject* pyopencv_from(const Point2d& p)
 {
     return Py_BuildValue("(dd)", p.x, p.y);
+}
+
+template<>
+PyObject* pyopencv_from(const Point3d& p)
+{
+    return Py_BuildValue("(ddd)", p.x, p.y, p.y);
 }
 
 template<typename _Tp> struct pyopencvVecConverter
@@ -921,6 +967,24 @@ template<typename _Tp> static inline PyObject* pyopencv_from_generic_vec(const s
     return seq;
 }
 
+template<>
+PyObject* pyopencv_from(const std::pair<int, double>& src)
+{
+    return Py_BuildValue("(id)", src.first, src.second);
+}
+
+template<typename _Tp, typename _Tr> struct pyopencvVecConverter<std::pair<_Tp, _Tr> >
+{
+    static bool to(PyObject* obj, std::vector<std::pair<_Tp, _Tr> >& value, const ArgInfo info)
+    {
+        return pyopencv_to_generic_vec(obj, value, info);
+    }
+
+    static PyObject* from(const std::vector<std::pair<_Tp, _Tr> >& value)
+    {
+        return pyopencv_from_generic_vec(value);
+    }
+};
 
 template<typename _Tp> struct pyopencvVecConverter<std::vector<_Tp> >
 {
@@ -1204,6 +1268,52 @@ static PyObject *pycvCreateTrackbar(PyObject*, PyObject *args)
     ERRWRAP2(createTrackbar(trackbar_name, window_name, value, count, OnChange, Py_BuildValue("OO", on_change, Py_None)));
     Py_RETURN_NONE;
 }
+
+static void OnButtonChange(int state, void *param)
+{
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    PyObject *o = (PyObject*)param;
+    PyObject *args;
+    if(PyTuple_GetItem(o, 1) != NULL)
+    {
+        args = Py_BuildValue("(iO)", state, PyTuple_GetItem(o,1));
+    }
+    else
+    {
+        args = Py_BuildValue("(i)", state);
+    }
+
+    PyObject *r = PyObject_Call(PyTuple_GetItem(o, 0), args, NULL);
+    if (r == NULL)
+        PyErr_Print();
+    Py_DECREF(args);
+    PyGILState_Release(gstate);
+}
+
+static PyObject *pycvCreateButton(PyObject*, PyObject *args, PyObject *kw)
+{
+    const char* keywords[] = {"buttonName", "onChange", "userData", "buttonType", "initialButtonState", NULL};
+    PyObject *on_change;
+    PyObject *userdata = NULL;
+    char* button_name;
+    int button_type = 0;
+    bool initial_button_state = false;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "sO|Oii", (char**)keywords, &button_name, &on_change, &userdata, &button_type, &initial_button_state))
+        return NULL;
+    if (!PyCallable_Check(on_change)) {
+        PyErr_SetString(PyExc_TypeError, "onChange must be callable");
+        return NULL;
+    }
+    if (userdata == NULL) {
+        userdata = Py_None;
+    }
+
+    ERRWRAP2(createButton(button_name, OnButtonChange, Py_BuildValue("OO", on_change, userdata), button_type, initial_button_state));
+    Py_RETURN_NONE;
+}
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1236,6 +1346,7 @@ static int convert_to_char(PyObject *o, char *dst, const char *name = "no_name")
 static PyMethodDef special_methods[] = {
 #ifdef HAVE_OPENCV_HIGHGUI
   {"createTrackbar", pycvCreateTrackbar, METH_VARARGS, "createTrackbar(trackbarName, windowName, value, count, onChange) -> None"},
+  {"createButton", (PyCFunction)pycvCreateButton, METH_VARARGS | METH_KEYWORDS, "createButton(buttonName, onChange [, userData, buttonType, initialButtonState]) -> None"},
   {"setMouseCallback", (PyCFunction)pycvSetMouseCallback, METH_VARARGS | METH_KEYWORDS, "setMouseCallback(windowName, onMouse [, param]) -> None"},
 #endif
   {NULL, NULL},
