@@ -7,9 +7,8 @@
 .sw[a-z]
 tags
 tegra/
-MSys/
-NB_MSys/
-NB_Ocv2.4.10/*
+NB_ocv2.4.10/*
+MSys_renlin_201607/
 VS10/
 Fedora/
 Ubuntu/
