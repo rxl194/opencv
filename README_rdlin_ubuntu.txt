@@ -18,6 +18,8 @@ sudo pip install -U nltk
 ### opencv from source
 # first, installing some utilities
 sudo apt-get install -y qt-sdk unzip
+sudo apt-get install libboost-all-dev
+
 OPENCV_VER=2.4.10
 curl "http://fossies.org/linux/misc/opencv-${OPENCV_VER}.zip" -o opencv-${OPENCV_VER}.zip
 unzip "opencv-${OPENCV_VER}.zip" && cd "opencv-${OPENCV_VER}"
@@ -28,3 +30,4 @@ cmake -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON \
       -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON \
       -D WITH_QT=ON -D WITH_OPENGL=ON -D WITH_VTK=ON \
       -D WITH_FFMPEG=OFF ..
+
