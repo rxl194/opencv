@@ -237,13 +237,10 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Convert GNU import libraries to MS format (requires Visual Studio)
-CMAKE_GNUtoMS:BOOL=ON
-
-//Visual Studio vcvars32.bat
-CMAKE_GNUtoMS_VCVARS:FILEPATH=CMAKE_GNUtoMS_VCVARS-NOTFOUND
+CMAKE_GNUtoMS:BOOL=OFF
 
 //Installation Directory
-CMAKE_INSTALL_PREFIX:PATH=C:/git/share/ocv2.4.10/
+CMAKE_INSTALL_PREFIX:PATH=C:/opt/ocv2.4.10/
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=C:/MinGW/bin/ld.exe
@@ -376,7 +373,7 @@ DVIPDF_CONVERTER:FILEPATH=DVIPDF_CONVERTER-NOTFOUND
 DVIPS_CONVERTER:FILEPATH=DVIPS_CONVERTER-NOTFOUND
 
 //The path to Eigen3/Eigen2 headers
-EIGEN_INCLUDE_PATH:PATH=C:/git/share/include
+EIGEN_INCLUDE_PATH:PATH=C:/opt/include
 
 //Enable AVX instructions
 ENABLE_AVX:BOOL=OFF
@@ -541,7 +538,7 @@ PYTHON_LIBRARY:FILEPATH=C:/Python27/libs/libpython27.a
 PYTHON_LIBRARY_DEBUG:FILEPATH=PYTHON_LIBRARY_DEBUG-NOTFOUND
 
 //Path to numpy headers
-PYTHON_NUMPY_INCLUDE_DIR:PATH=C:/Python27/lib/site-packages/numpy-1.11.1-py2.7-win32.egg/numpy/core/include
+PYTHON_NUMPY_INCLUDE_DIR:PATH=C:/Python27/lib/site-packages/numpy-1.12.0.dev0+d92c75b-py2.7-win32.egg/numpy/core/include
 
 //Where to install the python packages.
 PYTHON_PACKAGES_PATH:PATH=C:/Python27/Lib/site-packages
@@ -1192,8 +1189,6 @@ CMAKE_GENERATOR:INTERNAL=MSYS Makefiles
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
-//ADVANCED property for variable: CMAKE_GNUtoMS_VCVARS
-CMAKE_GNUtoMS_VCVARS-ADVANCED:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=C:/git/ocv2.4.10
