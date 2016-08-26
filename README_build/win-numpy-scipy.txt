@@ -1,0 +1,86 @@
+
+// TRY--one
+## Using VS2015 Community Ed
+
+// Use git-cmd
+$ git clone git://github.com/numpy/numpy.git numpy
+
+// Use VS15-cmd
+$ pip install Cython
+$ cd numpy
+$ C:/python27/python setup.py install
+
+$ CMake
+// Make sure eigen, and install_pre=/opt/ocv2.4.10, and python2 being build and find the correct path
+// WITH_IPP=OFF
+$ /MingGW/Msys/1.0/bin/make
+$ /MingGW/Msys/1.0/bin/make install
+$ add C:\opt\ocv2.4.10\x86\mingw\bin; C:\opt\ocv2.4.10\x86\mingw\lib to the path
+$ python
+>>> import cv2;
+>>> cv2.__version__
+>>> '2.4.10.4'
+
+$ download "numpy-1.11.1+mkl-cp27-cp27m-win32.whl"
+$ download scipy-0.18.0-cp27-cp27m-win32.whl
+$ pip install numpy-1.11.1+mkl-cp27-cp27m-win32.whl
+$ pip install scipy-0.18.0-cp27-cp27m-win32.whl
+
+>>> import numpy;
+>>> numpy.__version__
+>>> '1.11.1'
+
+>>> import scipy;
+>>> scipy.__version__
+>>> '0.18.0'
+
+
+// end TRY--one http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+
+$ install python2.7 32bit
+$ download "numpy-1.11.1+mkl-cp27-cp27m-win32.whl"
+$ download scipy-0.18.0-cp27-cp27m-win32.whl
+// Installing from Wheels
+// pip install SomePackage-1.0-py2.py3-none-any.whl
+$ pip install numpy-1.11.1+mkl-cp27-cp27m-win32.whl
+$ pip install scipy-0.18.0-cp27-cp27m-win32.whl
+
+
+// end TRY--one http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+
+// TRY use VS15 - python3.5
+$ install python3.5 32bit
+$ download and install numpy/scipy from http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+$ config CMake: make sure 
+  install_python_example=on, and detect both Python3 and Python2, and build both lib
+  build_perf_tests=off // if some compile errors
+  build_test=off 
+# Error:  import I got *ImportError: ... not a win32 DLL ... * 
+$ Visual C++ 2015 redistribution package installed
+$ add PRE_INSTALL_PATH to the system path: e.g
+$ add "c:/git/share/ocv3.0.0/bin;c:/git/share/ocv3.0.0/lib" to the path
+// end TRY use VS15 - python3.5
+
+// Comments:
+// Use above methods require opencv compile in VisualStudio as: python2.7--VS2008 express; python3.5--VS2015
+// Use MinGW will failed;
+
+// TRY MINGw+Python2.7+OpenCV2.4.10
+$ python2.7 msi install
+$ python-2.7.12-pdb.zip copy to->C:\Python27\pdb
+$ git clone https://github.com/numpy/numpy
+$ git clone https://github.com/scipy/scipy
+$ pip install Cython 
+
+// Use Microsoft compiler for python
+// Microsoft Visual C++ Compiler for Python 2.7
+$ C:/python27/python setup.py install 
+or
+$ C:/python27/scripts/pip install numpy
+$ C:/python27/scripts/pip install scipy
+
+$ git clone -b  2.4.x0.x-prep https://github.com/rxl194/opencv ./ocv2.4.10
+$ CMake-gui
+$ Special care: install_pre=C:/git/share/ocv2.4.10; eigen_inc=C:/git/share/include; 
+$ make sure  python are found;
+// end TRY MinGW+Python2.7+OpenCV2.4.10
