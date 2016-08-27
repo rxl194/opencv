@@ -21,11 +21,8 @@ bin/
 *.suo
 *.log
 *.tlog
-build/
-NB_ocv3.0.0
-include/Eigen/*
-include/unsupported/*
 build
+VS15_wsp
 NB_ocv3.1.0
 MSys_renlin_201607
 
