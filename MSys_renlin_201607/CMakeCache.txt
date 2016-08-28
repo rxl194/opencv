@@ -107,6 +107,9 @@ BUILD_opencv_ocl:BOOL=ON
 //Include opencv_photo module into the OpenCV build
 BUILD_opencv_photo:BOOL=ON
 
+//Include opencv_python module into the OpenCV build
+BUILD_opencv_python:BOOL=ON
+
 //Include opencv_stitching module into the OpenCV build
 BUILD_opencv_stitching:BOOL=ON
 
@@ -237,7 +240,7 @@ CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 CMAKE_GNUtoMS:BOOL=OFF
 
 //Installation Directory
-CMAKE_INSTALL_PREFIX:PATH=C:/git/share/ocv2.4.10
+CMAKE_INSTALL_PREFIX:PATH=C:/opt/ocv2.4.10/
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=C:/MinGW/bin/ld.exe
@@ -370,7 +373,7 @@ DVIPDF_CONVERTER:FILEPATH=DVIPDF_CONVERTER-NOTFOUND
 DVIPS_CONVERTER:FILEPATH=DVIPS_CONVERTER-NOTFOUND
 
 //The path to Eigen3/Eigen2 headers
-EIGEN_INCLUDE_PATH:PATH=C:/git/share/include
+EIGEN_INCLUDE_PATH:PATH=C:/opt/include
 
 //Enable AVX instructions
 ENABLE_AVX:BOOL=OFF
@@ -424,7 +427,7 @@ ENABLE_WINRT_MODE:BOOL=OFF
 ENABLE_WINRT_MODE_NATIVE:BOOL=OFF
 
 //Output directory for applications
-EXECUTABLE_OUTPUT_PATH:PATH=C:/git/share/ocv2.4.10/bin
+EXECUTABLE_OUTPUT_PATH:PATH=C:/git/ocv2.4.10/MSys_renlin_201607/bin
 
 //Path to the GhostScript binary directory.
 GHOSTSCRIPT_BINARY_PATH:PATH=GHOSTSCRIPT_BINARY_PATH-NOTFOUND
@@ -448,7 +451,7 @@ INSTALL_CREATE_DISTRIB:BOOL=OFF
 INSTALL_C_EXAMPLES:BOOL=OFF
 
 //Install Python examples
-INSTALL_PYTHON_EXAMPLES:BOOL=ON
+INSTALL_PYTHON_EXAMPLES:BOOL=OFF
 
 //Install accuracy and performance test binaries and test data
 INSTALL_TESTS:BOOL=OFF
@@ -457,10 +460,10 @@ INSTALL_TESTS:BOOL=OFF
 IlmImf_LIB_DEPENDS:STATIC=general;zlib;
 
 //Path to a file.
-JAVA_AWT_INCLUDE_PATH:PATH=C:/Program Files/Java/jdk1.8.0_65/include
+JAVA_AWT_INCLUDE_PATH:PATH=C:/Program Files/Java/jdk1.8.0_102/include
 
 //Path to a library.
-JAVA_AWT_LIBRARY:FILEPATH=C:/Program Files/Java/jdk1.8.0_65/lib/jawt.lib
+JAVA_AWT_LIBRARY:FILEPATH=C:/Program Files/Java/jdk1.8.0_102/lib/jawt.lib
 
 //Path to a file.
 JAVA_INCLUDE_PATH:PATH=C:/MinGW/include
@@ -469,7 +472,7 @@ JAVA_INCLUDE_PATH:PATH=C:/MinGW/include
 JAVA_INCLUDE_PATH2:PATH=JAVA_INCLUDE_PATH2-NOTFOUND
 
 //Path to a library.
-JAVA_JVM_LIBRARY:FILEPATH=C:/Program Files/Java/jdk1.8.0_65/lib/jvm.lib
+JAVA_JVM_LIBRARY:FILEPATH=C:/Program Files/Java/jdk1.8.0_102/lib/jvm.lib
 
 //Path to a program.
 LATEX2HTML_CONVERTER:FILEPATH=LATEX2HTML_CONVERTER-NOTFOUND
@@ -523,22 +526,22 @@ PVAPI_INCLUDE_PATH:PATH=PVAPI_INCLUDE_PATH-NOTFOUND
 PYTHON_DEBUG_LIBRARY:FILEPATH=PYTHON_DEBUG_LIBRARY-NOTFOUND
 
 //Path to a program.
-PYTHON_EXECUTABLE:FILEPATH=C:/Users/renlin/AppData/Local/Enthought/Canopy/User/python.exe
+PYTHON_EXECUTABLE:FILEPATH=C:/Python27/python.exe
 
 //Path to a file.
-PYTHON_INCLUDE_DIR:PATH=PYTHON_INCLUDE_DIR-NOTFOUND
+PYTHON_INCLUDE_DIR:PATH=C:/Python27/include
 
 //Path to a library.
-PYTHON_LIBRARY:FILEPATH=C:/Users/renlin/AppData/Local/Enthought/Canopy/User/libs/python27.lib
+PYTHON_LIBRARY:FILEPATH=C:/Python27/libs/libpython27.a
 
 //Path to a library.
 PYTHON_LIBRARY_DEBUG:FILEPATH=PYTHON_LIBRARY_DEBUG-NOTFOUND
 
 //Path to numpy headers
-PYTHON_NUMPY_INCLUDE_DIR:PATH=C:/Users/renlin/AppData/Local/Enthought/Canopy/User/lib/site-packages/numpy/core/include
+PYTHON_NUMPY_INCLUDE_DIR:PATH=C:/Python27/lib/site-packages/numpy-1.12.0.dev0+d92c75b-py2.7-win32.egg/numpy/core/include
 
 //Where to install the python packages.
-PYTHON_PACKAGES_PATH:PATH=C:/Users/renlin/AppData/Local/Enthought/Canopy/User/Lib/site-packages
+PYTHON_PACKAGES_PATH:PATH=C:/Python27/Lib/site-packages
 
 //Value Computed by CMake
 PracticalOpenCV_BINARY_DIR:STATIC=C:/git/ocv2.4.10/MSys_renlin_201607/mysample/PracticalOpenCV
@@ -947,6 +950,15 @@ opencv_photo_SOURCE_DIR:STATIC=C:/git/ocv2.4.10/modules/photo
 opencv_photo_pch_dephelp_LIB_DEPENDS:STATIC=
 
 //Value Computed by CMake
+opencv_python_BINARY_DIR:STATIC=C:/git/ocv2.4.10/MSys_renlin_201607/modules/python
+
+//Dependencies for the target
+opencv_python_LIB_DEPENDS:STATIC=general;C:/Python27/libs/libpython27.a;general;opencv_core;general;opencv_flann;general;opencv_imgproc;general;opencv_highgui;general;opencv_features2d;general;opencv_calib3d;general;opencv_ml;general;opencv_video;general;opencv_legacy;general;opencv_objdetect;general;opencv_photo;general;opencv_gpu;general;opencv_ocl;general;opencv_nonfree;general;opencv_contrib;
+
+//Value Computed by CMake
+opencv_python_SOURCE_DIR:STATIC=C:/git/ocv2.4.10/modules/python
+
+//Value Computed by CMake
 opencv_stitching_BINARY_DIR:STATIC=C:/git/ocv2.4.10/MSys_renlin_201607/modules/stitching
 
 //Dependencies for the target
@@ -1197,7 +1209,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=78
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=79
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -1260,7 +1272,9 @@ DVIPDF_CONVERTER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: DVIPS_CONVERTER
 DVIPS_CONVERTER-ADVANCED:INTERNAL=1
 //Details about finding PythonInterp
-FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[C:/Users/renlin/AppData/Local/Enthought/Canopy/User/python.exe][v2.7.11(2.0)]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[C:/Python27/python.exe][v2.7.12(2.0)]
+//Details about finding PythonLibs
+FIND_PACKAGE_MESSAGE_DETAILS_PythonLibs:INTERNAL=[C:/Python27/libs/libpython27.a][C:/Python27/include][v2.7.12(2.7.12)]
 //ADVANCED property for variable: GHOSTSCRIPT_BINARY_PATH
 GHOSTSCRIPT_BINARY_PATH-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GHOSTSCRIPT_LIBRARY_PATH
@@ -1501,8 +1515,8 @@ HAVE_opencv_objdetect:INTERNAL=ON
 HAVE_opencv_ocl:INTERNAL=ON
 //Module opencv_photo will be built in current configuration
 HAVE_opencv_photo:INTERNAL=ON
-//Module opencv_python can not be built in current configuration
-HAVE_opencv_python:INTERNAL=OFF
+//Module opencv_python will be built in current configuration
+HAVE_opencv_python:INTERNAL=ON
 //Module opencv_stitching will be built in current configuration
 HAVE_opencv_stitching:INTERNAL=ON
 //Module opencv_superres will be built in current configuration
@@ -1554,12 +1568,12 @@ OPENCV_EXTRA_FLAGS_DEBUG:INTERNAL= -O0 -DDEBUG -D_DEBUG
 //Extra compiler options for Release build
 OPENCV_EXTRA_FLAGS_RELEASE:INTERNAL= -DNDEBUG
 //List of OpenCV modules included into the build
-OPENCV_MODULES_BUILD:INTERNAL=opencv_core;opencv_flann;opencv_imgproc;opencv_highgui;opencv_features2d;opencv_calib3d;opencv_ml;opencv_video;opencv_legacy;opencv_objdetect;opencv_photo;opencv_gpu;opencv_ocl;opencv_nonfree;opencv_contrib;opencv_stitching;opencv_superres;opencv_ts;opencv_videostab
-OPENCV_MODULES_BUILD_ORDERED:INTERNAL=opencv_calib3d;opencv_contrib;opencv_core;opencv_features2d;opencv_flann;opencv_gpu;opencv_highgui;opencv_imgproc;opencv_legacy;opencv_ml;opencv_nonfree;opencv_objdetect;opencv_ocl;opencv_photo;opencv_stitching;opencv_superres;opencv_ts;opencv_video;opencv_videostab
+OPENCV_MODULES_BUILD:INTERNAL=opencv_core;opencv_flann;opencv_imgproc;opencv_highgui;opencv_features2d;opencv_calib3d;opencv_ml;opencv_video;opencv_legacy;opencv_objdetect;opencv_photo;opencv_gpu;opencv_ocl;opencv_nonfree;opencv_contrib;opencv_python;opencv_stitching;opencv_superres;opencv_ts;opencv_videostab
+OPENCV_MODULES_BUILD_ORDERED:INTERNAL=opencv_calib3d;opencv_contrib;opencv_core;opencv_features2d;opencv_flann;opencv_gpu;opencv_highgui;opencv_imgproc;opencv_legacy;opencv_ml;opencv_nonfree;opencv_objdetect;opencv_ocl;opencv_photo;opencv_python;opencv_stitching;opencv_superres;opencv_ts;opencv_video;opencv_videostab
 //List of OpenCV modules implicitly disabled due to dependencies
 OPENCV_MODULES_DISABLED_AUTO:INTERNAL=
 //List of OpenCV modules which can not be build in current configuration
-OPENCV_MODULES_DISABLED_FORCE:INTERNAL=opencv_androidcamera;opencv_dynamicuda;opencv_java;opencv_python;opencv_viz
+OPENCV_MODULES_DISABLED_FORCE:INTERNAL=opencv_androidcamera;opencv_dynamicuda;opencv_java;opencv_viz
 //List of OpenCV modules explicitly disabled by user
 OPENCV_MODULES_DISABLED_USER:INTERNAL=opencv_world
 //List of OpenCV modules marked for export
@@ -1892,8 +1906,25 @@ OPENCV_MODULE_opencv_photo_PRIVATE_REQ_DEPS:INTERNAL=
 OPENCV_MODULE_opencv_photo_REQ_DEPS:INTERNAL=opencv_imgproc
 //List of source files for opencv_photo
 OPENCV_MODULE_opencv_photo_SOURCES:INTERNAL=C:/git/ocv2.4.10/modules/photo/src/denoising.cpp;C:/git/ocv2.4.10/modules/photo/src/inpaint.cpp;C:/git/ocv2.4.10/modules/photo/src/arrays.hpp;C:/git/ocv2.4.10/modules/photo/src/fast_nlmeans_denoising_invoker.hpp;C:/git/ocv2.4.10/modules/photo/src/fast_nlmeans_denoising_invoker_commons.hpp;C:/git/ocv2.4.10/modules/photo/src/fast_nlmeans_multi_denoising_invoker.hpp;C:/git/ocv2.4.10/modules/photo/src/precomp.hpp
+//The category of the module
+OPENCV_MODULE_opencv_python_CLASS:INTERNAL=BINDINGS
+//Flattened dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_DEPS:INTERNAL=opencv_core;opencv_flann;opencv_imgproc;opencv_highgui;opencv_features2d;opencv_calib3d;opencv_ml;opencv_video;opencv_legacy;opencv_objdetect;opencv_photo;opencv_gpu;opencv_ocl;opencv_nonfree;opencv_contrib
+//Extra dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_DEPS_EXT:INTERNAL=
+OPENCV_MODULE_opencv_python_DEPS_ORDERED:INTERNAL=opencv_calib3d;opencv_contrib;opencv_core;opencv_features2d;opencv_flann;opencv_gpu;opencv_highgui;opencv_imgproc;opencv_legacy;opencv_ml;opencv_nonfree;opencv_objdetect;opencv_ocl;opencv_photo;opencv_video
+//Brief description of opencv_python module
+OPENCV_MODULE_opencv_python_DESCRIPTION:INTERNAL=The python bindings
 //Location of opencv_python module sources
 OPENCV_MODULE_opencv_python_LOCATION:INTERNAL=C:/git/ocv2.4.10/modules/python
+//Optional dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_OPT_DEPS:INTERNAL=opencv_nonfree
+//Optional private dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_PRIVATE_OPT_DEPS:INTERNAL=
+//Required private dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_PRIVATE_REQ_DEPS:INTERNAL=
+//Required dependencies of opencv_python module
+OPENCV_MODULE_opencv_python_REQ_DEPS:INTERNAL=opencv_core;opencv_flann;opencv_imgproc;opencv_video;opencv_ml;opencv_features2d;opencv_highgui;opencv_calib3d;opencv_photo;opencv_objdetect;opencv_contrib;opencv_legacy
 //The category of the module
 OPENCV_MODULE_opencv_stitching_CLASS:INTERNAL=PUBLIC
 //Flattened dependencies of opencv_stitching module
