@@ -15,5 +15,4 @@ Ubuntu/
 ubuntu/
 build/
 VS13_x86/
-include/Eigen
-include/unsupported
+VS08_x86_201607

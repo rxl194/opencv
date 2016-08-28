@@ -80,7 +80,7 @@ class ellipseFinder {
                 vector<Point> _c = c[i];
                 
                 Point p1 = _c.front(), p2 = _c.back();
-                float d = sqrt((p1.x - p2.x)^2 + (p1.y - p2.y)^2);
+                float d = (float)sqrt((float)((p1.x - p2.x)^2) + (float)((p1.y - p2.y)^2));
                 if(d <= 0.5) is_closed = true;
 
                 d = arcLength(_c, is_closed);
