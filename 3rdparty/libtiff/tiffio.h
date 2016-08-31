@@ -94,6 +94,15 @@ typedef void* tdata_t;          /* image data ref */
 #  endif
 #endif
 
+#if (defined WIN32) && (defined MINGW)
+#ifdef USE_WIN32_FILEIO
+#undef USE_WIN32_FILEIO
+#endif
+#ifndef AVOID_WIN32_FILEIO
+#define AVOID_WIN32_FILEIO
+#endif
+#endif
+         
 #if defined(USE_WIN32_FILEIO)
 # define VC_EXTRALEAN
 # include <windows.h>

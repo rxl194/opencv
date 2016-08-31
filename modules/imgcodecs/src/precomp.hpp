@@ -58,7 +58,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#if defined WIN32 || defined WINCE
+#if (defined WIN32 || defined WINCE) && (!defined MINGW_NO_WINDOWS_H)
     #if !defined _WIN32_WINNT
         #ifdef HAVE_MSMF
             #define _WIN32_WINNT 0x0600 // Windows Vista

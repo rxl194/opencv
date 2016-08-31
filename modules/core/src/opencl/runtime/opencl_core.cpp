@@ -89,6 +89,11 @@ static void* AppleCLGetProcAddress(const char* name)
 #endif // __APPLE__
 
 #if defined(_WIN32)
+#ifdef MINGW
+#ifndef NOGDI
+#define NOGDI // Get Rid of compiler erro t windows.h
+#endif
+#endif
 #include <windows.h>
 
 static void* WinGetProcAddress(const char* name)

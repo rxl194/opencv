@@ -40,6 +40,10 @@
 //
 //M*/
 
+#if defined WIN32 && defined MINGW && (!defined MINGW_NO_WINDOWS_H)
+#define MINGW_NO_WINDOWS_H
+#endif
+
 #include "precomp.hpp"
 
 #ifdef HAVE_OPENEXR

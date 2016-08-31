@@ -65,9 +65,11 @@ static cv::Mutex _icvInitFFMPEG_mutex;
 static const HMODULE cv_GetCurrentModule()
 {
     HMODULE h = 0;
+#ifndef MINGW    
     ::GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         reinterpret_cast<LPCTSTR>(cv_GetCurrentModule),
         &h);
+#endif
     return h;
 }
 #endif

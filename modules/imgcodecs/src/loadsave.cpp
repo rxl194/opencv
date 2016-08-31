@@ -43,6 +43,10 @@
 //  Loading and saving IPL images.
 //
 
+#if defined WIN32 && defined MINGW && (!defined MINGW_NO_WINDOWS_H)
+#define MINGW_NO_WINDOWS_H
+#endif
+
 #include "precomp.hpp"
 #include "grfmts.hpp"
 #undef min
