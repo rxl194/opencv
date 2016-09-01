@@ -8,7 +8,7 @@
     #add_extra_compiler_option(-Werror=non-virtual-dtor) // add comments
 
 
- 2. cmake -DWITH_IPP=OFF
+ 2. cmake -DWITH_IPP=OFF -DWITH_DSHOW=OFF -DWITH_VFW=OFF
 
 /***** 
 **  ubuntu:
