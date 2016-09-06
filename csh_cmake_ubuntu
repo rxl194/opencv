@@ -1,6 +1,7 @@
 #!/bin/csh
 
 cmake -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=/opt/ocv3.1.0 -D EIGEN_INCLUDE_PATH=/opt/ocv/include \
+  -D OPENCV_EXTRA_MODULES_PATH=/home/ystd2016/git/ocv3.1.0_contrib/modules \
   -D LEPTONICA_DIR=/opt/ocv -D Tesseract_INCLUDE_DIR=/ocv/include -D Tesseract_LIBRARY=/opt/ocv/lib/libtesseract.a \
   -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON \
   -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON \
