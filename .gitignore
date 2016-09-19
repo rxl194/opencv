@@ -7,3 +7,12 @@
 .sw[a-z]
 tags
 tegra/
+NB_ocv2.4.10/*
+MSys_renlin_201607/
+VS10/
+Fedora/
+Ubuntu/
+ubuntu/
+build/
+VS13_x86/
+VS08_x86_201607

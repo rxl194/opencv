@@ -254,7 +254,9 @@ struct HWFeatures
         }
 
     #if defined _MSC_VER && (defined _M_IX86 || defined _M_X64)
+#if (_MSC_VER != 1500)
         __cpuidex(cpuid_data, 7, 0);
+#endif
     #elif defined __GNUC__ && (defined __i386__ || defined __x86_64__)
         #ifdef __x86_64__
         asm __volatile__

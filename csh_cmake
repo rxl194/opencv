@@ -1,0 +1,1 @@
+cmake -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=/opt/ocv2.4.10 -D WITH_QT=ON ..

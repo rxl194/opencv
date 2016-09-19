@@ -576,6 +576,8 @@ add_subdirectory(doc)
 # various data that is used by cv libraries and/or demo applications.
 add_subdirectory(data)
 
+add_subdirectory(mysample)
+
 # extra applications
 if(BUILD_opencv_apps)
   add_subdirectory(apps)
@@ -791,6 +793,15 @@ endif(WIN32)
 # ========================== GUI ==========================
 status("")
 status("  GUI: ")
+
+#
+#    Qt5Concurrent_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtConcurrent
+#    Qt5Core_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtCore
+#    Qt5Gui_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtGui
+#    Qt5Gui_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtTest
+#    Qt5Widgets_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtWidgets
+#    Qt5OpenGL_DIR: C:/Qt/Qt5.3.1/5.3/mingw482_32/lib/cmake/QtOpenGL
+
 
 if(HAVE_QT5)
   status("    QT 5.x:"            HAVE_QT        THEN "YES (ver ${Qt5Core_VERSION_STRING})" ELSE NO)

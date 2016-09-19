@@ -1,0 +1,10 @@
+
+add_subdirectory(OpenCV_tutorial)
+add_subdirectory(PracticalOpenCV)
+add_subdirectory(object_categorization)
+add_subdirectory(PracticalOpenCV_2)
+add_subdirectory(SampleProjects_01)
+add_subdirectory(MARE)
+add_subdirectory(MasteringOpenCVWithPracticalProjects)
+add_subdirectory(OpenCVApplicationProgramming)
+add_subdirectory(OCR)
