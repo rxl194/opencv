@@ -576,8 +576,6 @@ add_subdirectory(doc)
 # various data that is used by cv libraries and/or demo applications.
 add_subdirectory(data)
 
-add_subdirectory(mysample)
-
 # extra applications
 if(BUILD_opencv_apps)
   add_subdirectory(apps)
@@ -586,6 +584,7 @@ endif()
 # examples
 if(BUILD_EXAMPLES OR BUILD_ANDROID_EXAMPLES OR INSTALL_PYTHON_EXAMPLES)
   add_subdirectory(samples)
+  add_subdirectory(mysample)
 endif()
 
 if(ANDROID)
