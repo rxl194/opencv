@@ -40,6 +40,9 @@
 //
 //M*/
 
+#if defined WIN32 && defined MINGW && (!defined NOGDI)
+#define NOGDI
+#endif
 #include "precomp.hpp"
 
 #ifdef HAVE_OPENEXR

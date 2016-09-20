@@ -1850,7 +1850,11 @@ icvCreateTrackbar( const char* trackbar_name, const char* window_name,
 
             // CreateToolbarEx is deprecated and forces linking against Comctl32.lib.
             window->toolbar.toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL,
+#ifdef MINGW
+                                        WS_CHILD | CCS_TOP | TBSTYLE_WRAPABLE,                    
+#else
                                         WS_CHILD | CCS_TOP | TBSTYLE_WRAPABLE | BTNS_AUTOSIZE | BTNS_BUTTON,
+#endif              
                                         0, 0, 0, 0,
                                         window->frame, NULL, GetModuleHandle(NULL), NULL);
             // CreateToolbarEx automatically sends this but CreateWindowEx doesn't.
