@@ -1,0 +1,33 @@
+
+#$ install brew
+#$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+#$ brew update
+#$ brew install cmake pkg-config
+#$ brew install jpeg libpng libtiff openexr
+#$ brew install eigen tbb
+
+#$ git clone https://github.com/<git> ocv3.1.0
+#$ cd ocv3.1.0
+#$ mkdir build
+#$ cd build
+#$ bash ../csh_cmake_osx
+
+#$ python
+#>> import site
+#>> site.getsitepackages()
+#>> import sys
+#>> sys.path
+
+
+
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D PYTHON2_PACKAGES_PATH=/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages \
+      -D PYTHON2_LIBRARY=/Library/Frameworks/Python.framework/Versions/2.7/bin \
+      -D PYTHON2_INCLUDE_DIR=/Library/Frameworks/Python.framework/Versions/2.7/Headers \
+      -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON \
+      -D BUILD_EXAMPLES=ON ..
+
+
+#$ -- Installing: /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/cv2.so
+
