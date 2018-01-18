@@ -31,7 +31,7 @@
 
 #import "opencv2/videoio/cap_ios.h"
 #include "precomp.hpp"
-#import <AssetsLibrary/AssetsLibrary.h>
+#import <UIKit/UIKit.h>
 
 
 static CGFloat DegreesToRadians(CGFloat degrees) {return degrees * M_PI / 180;}
@@ -129,31 +129,33 @@ static CGFloat DegreesToRadians(CGFloat degrees) {return degrees * M_PI / 180;}
 
 - (void)stop;
 {
-    [super stop];
+    if (self.running == YES) {
+        [super stop];
 
-    self.videoDataOutput = nil;
-    if (videoDataOutputQueue) {
-        dispatch_release(videoDataOutputQueue);
-    }
-
-    if (self.recordVideo == YES) {
-        if (self.recordAssetWriter) {
-            if (self.recordAssetWriter.status == AVAssetWriterStatusWriting) {
-                [self.recordAssetWriter finishWriting];
-                NSLog(@"[Camera] recording stopped");
-            } else {
-                NSLog(@"[Camera] Recording Error: asset writer status is not writing");
-            }
-            self.recordAssetWriter = nil;
+        [videoDataOutput release];
+        if (videoDataOutputQueue) {
+            dispatch_release(videoDataOutputQueue);
         }
 
-        self.recordAssetWriterInput = nil;
-        self.recordPixelBufferAdaptor = nil;
-    }
+        if (self.recordVideo == YES) {
+            if (self.recordAssetWriter) {
+                if (self.recordAssetWriter.status == AVAssetWriterStatusWriting) {
+                    [self.recordAssetWriter finishWriting];
+                    NSLog(@"[Camera] recording stopped");
+                } else {
+                    NSLog(@"[Camera] Recording Error: asset writer status is not writing");
+                }
+                [recordAssetWriter release];
+            }
 
-    if (self.customPreviewLayer) {
-        [self.customPreviewLayer removeFromSuperlayer];
-        self.customPreviewLayer = nil;
+            [recordAssetWriterInput release];
+            [recordPixelBufferAdaptor release];
+        }
+
+        if (self.customPreviewLayer) {
+            [self.customPreviewLayer removeFromSuperlayer];
+            self.customPreviewLayer = nil;
+        }
     }
 }
 
@@ -351,7 +353,8 @@ static CGFloat DegreesToRadians(CGFloat degrees) {return degrees * M_PI / 180;}
     // create a custom preview layer
     self.customPreviewLayer = [CALayer layer];
     self.customPreviewLayer.bounds = CGRectMake(0, 0, self.parentView.frame.size.width, self.parentView.frame.size.height);
-    [self layoutPreviewLayer];
+    self.customPreviewLayer.position = CGPointMake(self.parentView.frame.size.width/2., self.parentView.frame.size.height/2.);
+    [self updateOrientation];
 
     // create a serial dispatch queue used for the sample buffer delegate as well as when a still image is captured
     // a serial dispatch queue must be used to guarantee that video frames will be delivered in order
@@ -624,11 +627,7 @@ static CGFloat DegreesToRadians(CGFloat degrees) {return degrees * M_PI / 180;}
         return;
     }
 
-    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-    if ([library videoAtPathIsCompatibleWithSavedPhotosAlbum:[self videoFileURL]]) {
-        [library writeVideoAtPathToSavedPhotosAlbum:[self videoFileURL]
-                                    completionBlock:^(NSURL *assetURL, NSError *error){ (void)assetURL; (void)error; }];
-    }
+    UISaveVideoAtPathToSavedPhotosAlbum([self videoFileString], nil, nil, NULL);
 }
 
 

@@ -696,6 +696,11 @@ BFMatcher::BFMatcher( int _normType, bool _crossCheck )
     crossCheck = _crossCheck;
 }
 
+Ptr<BFMatcher> BFMatcher::create(int _normType, bool _crossCheck )
+{
+    return makePtr<BFMatcher>(_normType, _crossCheck);
+}
+
 Ptr<DescriptorMatcher> BFMatcher::clone( bool emptyTrainData ) const
 {
     Ptr<BFMatcher> matcher = makePtr<BFMatcher>(normType, crossCheck);
@@ -766,7 +771,7 @@ void BFMatcher::knnMatchImpl( InputArray _queryDescriptors, std::vector<std::vec
     Size trainDescSize = trainDescCollection.empty() ? utrainDescCollection[0].size() : trainDescCollection[0].size();
     int trainDescOffset = trainDescCollection.empty() ? (int)utrainDescCollection[0].offset : 0;
 
-    if ( ocl::useOpenCL() && _queryDescriptors.isUMat() && _queryDescriptors.dims()<=2 && trainDescVectorSize == 1 &&
+    if ( ocl::isOpenCLActivated() && _queryDescriptors.isUMat() && _queryDescriptors.dims()<=2 && trainDescVectorSize == 1 &&
         _queryDescriptors.type() == CV_32FC1 && _queryDescriptors.offset() == 0 && trainDescOffset == 0 &&
         trainDescSize.width == _queryDescriptors.size().width && masks.size() == 1 && masks[0].total() == 0 )
     {
@@ -914,7 +919,7 @@ void BFMatcher::radiusMatchImpl( InputArray _queryDescriptors, std::vector<std::
     Size trainDescSize = trainDescCollection.empty() ? utrainDescCollection[0].size() : trainDescCollection[0].size();
     int trainDescOffset = trainDescCollection.empty() ? (int)utrainDescCollection[0].offset : 0;
 
-    if ( ocl::useOpenCL() && _queryDescriptors.isUMat() && _queryDescriptors.dims()<=2 && trainDescVectorSize == 1 &&
+    if ( ocl::isOpenCLActivated() && _queryDescriptors.isUMat() && _queryDescriptors.dims()<=2 && trainDescVectorSize == 1 &&
         _queryDescriptors.type() == CV_32FC1 && _queryDescriptors.offset() == 0 && trainDescOffset == 0 &&
         trainDescSize.width == _queryDescriptors.size().width && masks.size() == 1 && masks[0].total() == 0 )
     {
@@ -953,7 +958,7 @@ void BFMatcher::radiusMatchImpl( InputArray _queryDescriptors, std::vector<std::
     Mat dist, distf;
 
     int iIdx, imgCount = (int)trainDescCollection.size();
-    int dtype = normType == NORM_HAMMING ||
+    int dtype = normType == NORM_HAMMING || normType == NORM_HAMMING2 ||
         (normType == NORM_L1 && queryDescriptors.type() == CV_8U) ? CV_32S : CV_32F;
 
     for( iIdx = 0; iIdx < imgCount; iIdx++ )
@@ -1000,11 +1005,14 @@ void BFMatcher::radiusMatchImpl( InputArray _queryDescriptors, std::vector<std::
 Ptr<DescriptorMatcher> DescriptorMatcher::create( const String& descriptorMatcherType )
 {
     Ptr<DescriptorMatcher> dm;
+#ifdef HAVE_OPENCV_FLANN
     if( !descriptorMatcherType.compare( "FlannBased" ) )
     {
         dm = makePtr<FlannBasedMatcher>();
     }
-    else if( !descriptorMatcherType.compare( "BruteForce" ) ) // L2
+    else
+#endif
+    if( !descriptorMatcherType.compare( "BruteForce" ) ) // L2
     {
         dm = makePtr<BFMatcher>(int(NORM_L2)); // anonymous enums can't be template parameters
     }
@@ -1031,6 +1039,44 @@ Ptr<DescriptorMatcher> DescriptorMatcher::create( const String& descriptorMatche
     return dm;
 }
 
+Ptr<DescriptorMatcher> DescriptorMatcher::create(int matcherType)
+{
+
+
+    String name;
+
+    switch(matcherType)
+    {
+#ifdef HAVE_OPENCV_FLANN
+    case FLANNBASED:
+        name = "FlannBased";
+        break;
+#endif
+    case BRUTEFORCE:
+        name = "BruteForce";
+        break;
+    case BRUTEFORCE_L1:
+        name = "BruteForce-L1";
+        break;
+    case BRUTEFORCE_HAMMING:
+        name = "BruteForce-Hamming";
+        break;
+    case BRUTEFORCE_HAMMINGLUT:
+        name = "BruteForce-HammingLUT";
+        break;
+    case BRUTEFORCE_SL2:
+        name = "BruteForce-SL2";
+        break;
+    default:
+        CV_Error( Error::StsBadArg, "Specified descriptor matcher type is not supported." );
+        break;
+    }
+
+    return DescriptorMatcher::create(name);
+
+}
+
+#ifdef HAVE_OPENCV_FLANN
 
 /*
  * Flann based matcher
@@ -1040,6 +1086,11 @@ FlannBasedMatcher::FlannBasedMatcher( const Ptr<flann::IndexParams>& _indexParam
 {
     CV_Assert( _indexParams );
     CV_Assert( _searchParams );
+}
+
+Ptr<FlannBasedMatcher> FlannBasedMatcher::create()
+{
+    return makePtr<FlannBasedMatcher>();
 }
 
 void FlannBasedMatcher::add( InputArrayOfArrays _descriptors )
@@ -1374,4 +1425,7 @@ void FlannBasedMatcher::radiusMatchImpl( InputArray _queryDescriptors, std::vect
 
     convertToDMatches( mergedDescriptors, indices, dists, matches );
 }
+
+#endif
+
 }

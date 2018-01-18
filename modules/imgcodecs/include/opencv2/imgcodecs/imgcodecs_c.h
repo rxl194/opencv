@@ -63,7 +63,9 @@ enum
 /* any depth, ? */
     CV_LOAD_IMAGE_ANYDEPTH   =2,
 /* ?, any color */
-    CV_LOAD_IMAGE_ANYCOLOR   =4
+    CV_LOAD_IMAGE_ANYCOLOR   =4,
+/* ?, no rotate */
+    CV_LOAD_IMAGE_IGNORE_ORIENTATION  =128
 };
 
 /* load image from file
@@ -92,6 +94,7 @@ enum
     CV_IMWRITE_PNG_STRATEGY_RLE =3,
     CV_IMWRITE_PNG_STRATEGY_FIXED =4,
     CV_IMWRITE_PXM_BINARY =32,
+    CV_IMWRITE_EXR_TYPE = 48,
     CV_IMWRITE_WEBP_QUALITY =64,
     CV_IMWRITE_PAM_TUPLETYPE = 128,
     CV_IMWRITE_PAM_FORMAT_NULL = 0,
