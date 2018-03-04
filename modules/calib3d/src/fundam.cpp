@@ -47,29 +47,6 @@
 namespace cv
 {
 
-static bool haveCollinearPoints( const Mat& m, int count )
-{
-    int j, k, i = count-1;
-    const Point2f* ptr = m.ptr<Point2f>();
-
-    // check that the i-th selected point does not belong
-    // to a line connecting some previously selected points
-    for( j = 0; j < i; j++ )
-    {
-        double dx1 = ptr[j].x - ptr[i].x;
-        double dy1 = ptr[j].y - ptr[i].y;
-        for( k = 0; k < j; k++ )
-        {
-            double dx2 = ptr[k].x - ptr[i].x;
-            double dy2 = ptr[k].y - ptr[i].y;
-            if( fabs(dx2*dy1 - dy2*dx1) <= FLT_EPSILON*(fabs(dx1) + fabs(dy1) + fabs(dx2) + fabs(dy2)))
-                return true;
-        }
-    }
-    return false;
-}
-
-
 class HomographyEstimatorCallback : public PointSetRegistrator::Callback
 {
 public:
@@ -194,7 +171,7 @@ public:
             float ww = 1.f/(Hf[6]*M[i].x + Hf[7]*M[i].y + 1.f);
             float dx = (Hf[0]*M[i].x + Hf[1]*M[i].y + Hf[2])*ww - m[i].x;
             float dy = (Hf[3]*M[i].x + Hf[4]*M[i].y + Hf[5])*ww - m[i].y;
-            err[i] = (float)(dx*dx + dy*dy);
+            err[i] = dx*dx + dy*dy;
         }
     }
 };
@@ -446,7 +423,7 @@ namespace cv
 
 static int run7Point( const Mat& _m1, const Mat& _m2, Mat& _fmatrix )
 {
-    double a[7*9], w[7], u[9*9], v[9*9], c[4], r[3];
+    double a[7*9], w[7], u[9*9], v[9*9], c[4], r[3] = {0};
     double* f1, *f2;
     double t0, t1, t2;
     Mat A( 7, 9, CV_64F, a );
@@ -789,7 +766,7 @@ void cv::computeCorrespondEpilines( InputArray _points, int whichImage,
 {
     CV_INSTRUMENT_REGION()
 
-    double f[9];
+    double f[9] = {0};
     Mat tempF(3, 3, CV_64F, f);
     Mat points = _points.getMat(), F = _Fmat.getMat();
 
@@ -977,7 +954,7 @@ void cv::convertPointsToHomogeneous( InputArray _src, OutputArray _dst )
     }
     CV_Assert( npoints >= 0 && (depth == CV_32S || depth == CV_32F || depth == CV_64F));
 
-    int dtype = CV_MAKETYPE(depth <= CV_32F ? CV_32F : CV_64F, cn+1);
+    int dtype = CV_MAKETYPE(depth, cn+1);
     _dst.create(npoints, 1, dtype);
     Mat dst = _dst.getMat();
     if( !dst.isContinuous() )
